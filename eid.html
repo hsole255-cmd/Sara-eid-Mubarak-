@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ዒድ ሙባረክ | Special Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Ethiopic:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            color: white;
+            font-family: 'Noto Serif Ethiopic', serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .content {
+            z-index: 10;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin: 0;
+            background: linear-gradient(to bottom, #fff, #d4af37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        p {
+            font-size: 1.4rem;
+            color: #ccc;
+            margin-top: 20px;
+            opacity: 0;
+            transition: 1s 1s;
+        }
+
+        .mubarak {
+            display: block;
+            font-size: 2.8rem;
+            color: #d4af37;
+            font-weight: 900;
+            margin-top: 20px;
+            opacity: 0;
+            transition: 1s 2s;
+        }
+
+        /* የመክፈቻ ቁልፍ */
+        #gate {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 1s;
+        }
+
+        .gate-btn {
+            background: none;
+            border: 2px solid #d4af37;
+            color: #d4af37;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-family: 'Noto Serif Ethiopic', serif;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+        }
+
+        .show h1 { opacity: 1; transform: scale(1); }
+        .show p { opacity: 1; }
+        .show .mubarak { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div id="gate">
+        <button class="gate-btn" onclick="celebrate()">ስጦታሽን ክፈቺ ✨</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="content" id="main-content">
+        <div style="font-size: 4rem;">🌙</div>
+        <h1>እንኳን አደረሰሽ</h1>
+        <p>የኔ ውድ ደስታሽ እንደ ሰማይ ከዋክብት ይብዛ።</p>
+        <span class="mubarak">ዒድ ሙባረክ!</span>
+    </div>
+
+    <audio id="music" loop><source src="music.mp3" type="audio/mpeg"></audio>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const music = document.getElementById('music');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.onresize = resize;
+        resize();
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 6 - 3;
+                this.speedY = Math.random() * 6 - 3;
+                this.color = `hsl(${Math.random() * 40 + 40}, 100%, 50%)`; // Goldish
+                this.life = 100;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life -= 1;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function createExplosion(x, y) {
+            for (let i = 0; i < 100; i++) {
+                particles.push(new Particle(x, y));
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                if (particles[i].life <= 0) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        function celebrate() {
+            document.getElementById('gate').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('gate').style.display = 'none';
+                document.getElementById('main-content').classList.add('show');
+                createExplosion(window.innerWidth / 2, window.innerHeight / 2);
+            }, 1000);
+
+            music.currentTime = 17;
+            music.play();
+            
+            // በየ 2 ሰከንዱ ትንሽ ፍንዳታ እንዲኖር
+            setInterval(() => {
+                createExplosion(Math.random() * window.innerWidth, Math.random() * window.innerHeight);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
